@@ -249,13 +249,28 @@ NEWS_BUCKETS = {
 @st.cache_data(ttl=600)
 def fetch_news(query, max_items=5):
     if not NEWS_API_KEY:
+        st.error("NEWS_API_KEY missing in Streamlit Secrets")
         return []
+
     q = requests.utils.quote(query)
     url = f"https://gnews.io/api/v4/search?q={q}&lang=en&max={max_items}&apikey={NEWS_API_KEY}"
-    data = safe_get_json(url, timeout=20)
-    if isinstance(data, dict):
-        return data.get("articles", [])
-    return []
+
+    try:
+        r = requests.get(url, timeout=20)
+
+        # TEMP DEBUG: remove after issue is solved
+        st.write("DEBUG:", query, "status =", r.status_code)
+
+        if r.status_code != 200:
+            st.write("DEBUG response:", r.text[:300])
+            return []
+
+        data = r.json()
+        return data.get("articles", []) if isinstance(data, dict) else []
+
+    except Exception as e:
+        st.write("DEBUG exception:", query, str(e))
+        return []
 
 
 def dedupe_articles(items):
@@ -277,13 +292,20 @@ def dedupe_articles(items):
 def get_all_news(limit=5):
     news_data = {}
     all_news = []
+
     for bucket, queries in NEWS_BUCKETS.items():
         bucket_items = []
+        st.subheader(f"DEBUG BUCKET: {bucket}")
+
         for q in queries:
-            bucket_items.extend(fetch_news(q, max_items=limit))
+            items = fetch_news(q, max_items=limit)
+            st.write("Query:", q, "| items:", len(items))
+            bucket_items.extend(items)
+
         bucket_items = dedupe_articles(bucket_items)[:limit]
         news_data[bucket] = bucket_items
         all_news.extend(bucket_items)
+
     return news_data, dedupe_articles(all_news)
 
 
