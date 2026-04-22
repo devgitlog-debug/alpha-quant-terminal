@@ -991,31 +991,93 @@ for row in stock_rows:
 st.divider()
 
 # =========================================================
-# OPTIONAL GEMINI SUMMARY (NON-CRITICAL)
+# OPTIONAL GEMINI SUMMARY (ADVANCED AI ENGINE)
 # =========================================================
 if SHOW_AI:
-    st.subheader("✨ Optional Gemini Summary")
+    st.subheader("✨ Expert Gemini AI Insights")
     if not GEMINI_API_KEY or genai is None:
         st.warning("Gemini is not available right now. Dashboard is running in rule-based mode.")
     else:
-        if st.button("Run AI Summary"):
-            try:
-                client = genai.Client(api_key=GEMINI_API_KEY)
-                payload = {
-                    "market_view": market_view,
-                    "market_bias": market_bias,
-                    "total_news_score": total_news_score,
-                    "pulse": pulse,
-                    "stocks": stock_rows[:10],
-                }
-                prompt = (
-                    "Return concise JSON only with keys: market_view, action_plan, risk_notes.\n"
-                    "Use the input data. No extra text.\n\n"
-                    f"DATA:\n{json.dumps(payload, ensure_ascii=False)}"
-                )
-                resp = client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
-                st.code(resp.text or "", language="json")
-            except Exception as e:
-                st.warning(f"Gemini failed: {e}")
+        if st.button("🧠 Run Deep AI Summary"):
+            with st.spinner("AI is analyzing cross-asset correlations & finding top stocks..."):
+                try:
+                    client = genai.Client(api_key=GEMINI_API_KEY)
+                    
+                    # ---------------------------------------------------------
+                    # SNIPPET 3: TOP 5 STOCKS SORTING LOGIC
+                    # (Priority: BUY/ACCUMULATE > Fund Score > Less Risk)
+                    # ---------------------------------------------------------
+                    sorted_stocks = sorted(
+                        stock_rows, 
+                        key=lambda r: (r["action"] in ["BUY", "ACCUMULATE"], r["fund_score"], -r["risk_score"]), 
+                        reverse=True
+                    )
+                    best_5_stocks = sorted_stocks[:5]
+
+                    # ---------------------------------------------------------
+                    # SNIPPET 2: TOP 5 IMPACT NEWS SORTING LOGIC
+                    # (Absolute Score के आधार पर सबसे बड़े धमाके वाली न्यूज़)
+                    # ---------------------------------------------------------
+                    impactful_news = sorted(
+                        analyzed_news, 
+                        key=lambda n: abs(n['sentiment_score']), 
+                        reverse=True
+                    )
+                    top_headlines_for_ai = [
+                        f"[{n['impact']}] {n['title']} (Score: {n['sentiment_score']})" 
+                        for n in impactful_news[:5]
+                    ]
+
+                    # ---------------------------------------------------------
+                    # SNIPPET 4: NEW AI PAYLOAD & PROMPT
+                    # ---------------------------------------------------------
+                    payload = {
+                        "market_context": {
+                            "view": market_view,
+                            "sentiment_score": total_news_score,
+                            "top_impact_headlines": top_headlines_for_ai
+                        },
+                        "global_commodities_USD": {
+                            "Gold_Global_USD": pulse.get("Gold (Global)", {}).get("val", "N/A"),
+                            "Crude_Oil_USD": pulse.get("Crude Oil", {}).get("val", "N/A")
+                        },
+                        "indian_indices_INR": {
+                            "Nifty_50": pulse.get("Nifty 50", {}).get("val", "N/A"),
+                            "India_VIX": pulse.get("India VIX", {}).get("val", "N/A"),
+                            "Gold_ETF_INR": pulse.get("Gold ETF (India)", {}).get("val", "N/A")
+                        },
+                        "portfolio_rules": {
+                            "total_capital_INR": CAPITAL,
+                            "risk_per_trade_pct": RISK_PER_TRADE_PCT
+                        },
+                        "top_opportunities": [{"stock": r["name"], "action": r["action"], "reason": r["reason"]} for r in best_5_stocks]
+                    }
+
+                    prompt = f"""
+                    You are a highly experienced Quantitative Fund Manager in India.
+                    I am providing you with live market data as a JSON payload.
+
+                    CRITICAL RULES:
+                    - 'global_commodities_USD' values are in US Dollars ($).
+                    - 'indian_indices_INR' and stock prices are in Indian Rupees (₹) or Points.
+                    - Analyze the 'top_impact_headlines' carefully to understand the market drivers.
+
+                    Based on the payload, provide a highly professional 3-point summary in JSON format EXACTLY with these keys:
+                    1. "macro_view": (Analyze the specific top headlines and commodity prices to explain current market conditions).
+                    2. "capital_strategy": (What to do with the {CAPITAL} INR capital right now based on the risk and macro view).
+                    3. "stock_focus": (Which 1 or 2 stocks from the payload have the best setup and why).
+
+                    DATA PAYLOAD:
+                    {json.dumps(payload, ensure_ascii=False)}
+                    """
+
+                    # यहाँ तुम्हारा st.secrets वाला मॉडल नेम इस्तेमाल हो रहा है
+                    resp = client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
+                    
+                    ai_text = resp.text.replace('```json', '').replace('```', '')
+                    st.json(json.loads(ai_text))
+                    
+                except Exception as e:
+                    st.error(f"Gemini API Error: {e}")
 
 st.caption(f"Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
