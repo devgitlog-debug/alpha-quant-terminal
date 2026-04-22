@@ -1,6 +1,7 @@
 import os
 import json
 import math
+import pytz
 from datetime import datetime
 from collections import Counter, defaultdict
 
@@ -1136,4 +1137,8 @@ if SHOW_AI:
                 except Exception as e:
                     st.error(f"Gemini API Error: {e}")
 
-st.caption(f"Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+# भारतीय समय (IST) सेट करना
+IST = pytz.timezone('Asia/Kolkata')
+india_time = datetime.now(IST).strftime('%d-%m-%Y %I:%M:%S %p')
+
+st.caption(f"🕒 Last updated: {india_time} (IST)")
