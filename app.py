@@ -21,6 +21,28 @@ except Exception:
 st.set_page_config(page_title="Alpha Quant Terminal", page_icon="📈", layout="wide")
 st.title("📈 Alpha Quant Terminal")
 st.caption("Short-term + Long-term Investment Dashboard | News + Sentiment + Portfolio + Risk")
+st.markdown(
+    """
+    <div style="
+        padding: 14px 18px;
+        border-radius: 16px;
+        background: #0f172a;
+        border-left: 4px solid #22c55e;
+        margin-bottom: 18px;
+    ">
+        <div style="font-size: 13px; color: #94a3b8; letter-spacing: 0.5px;">
+            BUILT BY
+        </div>
+        <div style="font-size: 20px; font-weight: 800; color: #ffffff;">
+            Divyansh Parashar
+        </div>
+        <div style="font-size: 13px; color: #cbd5e1;">
+            Alpha Quant Terminal
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 NEWS_API_KEY = st.secrets.get("NEWS_API_KEY", os.getenv("NEWS_API_KEY"))
 GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY"))
