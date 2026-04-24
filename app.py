@@ -2,6 +2,7 @@ import os
 import json
 import math
 import pytz
+import time
 from datetime import datetime
 from collections import Counter, defaultdict
 
@@ -245,6 +246,7 @@ def get_all_news(limit=5):
         bucket_items = []
         for q in queries:
             bucket_items.extend(fetch_news(q, max_items=limit))
+            time.sleep(1.2) #sleep to excute query normaly
         bucket_items = dedupe_articles(bucket_items)[:limit]
         news_data[bucket] = bucket_items
         all_news.extend(bucket_items)
