@@ -1072,7 +1072,7 @@ if SHOW_AI:
                         "top_opportunities": [{"stock": r["name"], "action": r["action"], "reason": r["reason"]} for r in best_5_stocks]
                     }
 
-                   prompt = f"""
+                    prompt = f"""
                     You are the Chief Investment Officer (CIO) of an elite Quant Fund in India.
                     Your Python engine has provided the raw data, impact news, and a preliminary mathematical signal for top stocks.
                     
