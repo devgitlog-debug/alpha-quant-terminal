@@ -193,23 +193,24 @@ def safe_round(x, digits=2):
 # =========================================================
 # NEWS ENGINE
 # =========================================================
+
 NEWS_BUCKETS = {
     "🇮🇳 Indian Market": [
-        "Nifty OR Sensex OR RBI OR Indian stocks OR inflation OR earnings OR banking stocks India OR PSU banks OR auto stocks India OR market outlook India OR Nifty OR Sensex OR Indian stocks OR market outlook India"
+        "Nifty OR Sensex OR RBI OR inflation OR banking stocks India OR PSU banks OR auto stocks"
     ],
     "🌍 Global Market": [
-        "US market OR Fed OR Nasdaq OR recession OR treasury yields OR dollar index OR Europe markets OR Asia markets OR global growth OR crude oil OR commodities OR US stocks OR Fed OR Nasdaq OR crude oil OR dollar index OR recession",
+        "US market OR Fed OR Nasdaq OR recession OR treasury yields OR dollar index OR crude oil OR commodities"
     ],
     "⚔️ Geo Politics": [
-        "war OR sanctions OR tariffs OR China OR Russia OR Israel OR Middle East OR shipping route OR supply chain OR trade war OR oil shock OR war OR sanctions OR tariffs OR China OR Russia OR Middle East",
+        "war OR sanctions OR tariffs OR China OR Russia OR Middle East OR shipping route OR supply chain"
     ],
     "🏭 Sector News": [
-        "banking stocks OR IT stocks OR defence stocks OR pharma stocks OR infra stocks OR RBI OR order book OR earnings OR guidance OR capex OR banking stocks india OR IT sector India OR metal stocks India OR auto stocks OR HDFC Bank OR SBI OR ICICI Bank OR TCS OR Infosys OR HAL OR Mazagon Dock OR BEL OR infra stocks India OR banking stocks India OR defence stocks India OR pharma stocks India OR infra stocks India",
+        "banking OR IT stocks OR defence OR pharma OR infra OR order book OR capex OR HDFC OR TCS OR Infosys"
     ],
 }
 
 
-@st.cache_data(ttl=6)
+@st.cache_data(ttl=7200)
 def fetch_news(query, max_items=5):
     if not NEWS_API_KEY:
         return []
@@ -236,7 +237,7 @@ def dedupe_articles(items):
     return out
 
 
-@st.cache_data(ttl=6)
+@st.cache_data(ttl=7200)
 def get_all_news(limit=5):
     news_data = {}
     all_news = []
