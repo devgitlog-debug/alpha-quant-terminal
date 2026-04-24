@@ -209,7 +209,7 @@ NEWS_BUCKETS = {
 }
 
 
-@st.cache_data(ttl=600)
+@st.cache_data(ttl=6)
 def fetch_news(query, max_items=5):
     if not NEWS_API_KEY:
         return []
@@ -236,7 +236,7 @@ def dedupe_articles(items):
     return out
 
 
-@st.cache_data(ttl=600)
+@st.cache_data(ttl=6)
 def get_all_news(limit=5):
     news_data = {}
     all_news = []
@@ -1072,19 +1072,22 @@ if SHOW_AI:
                         "top_opportunities": [{"stock": r["name"], "action": r["action"], "reason": r["reason"]} for r in best_5_stocks]
                     }
 
-                    prompt = f"""
-                    You are a highly experienced Quantitative Fund Manager in India.
-                    I am providing you with live market data as a JSON payload.
+                   prompt = f"""
+                    You are the Chief Investment Officer (CIO) of an elite Quant Fund in India.
+                    Your Python engine has provided the raw data, impact news, and a preliminary mathematical signal for top stocks.
+                    
+                    CRITICAL INSTRUCTION: DO NOT blindly follow the Python engine's 'action' signal. You must apply your own complex reasoning, probability analysis, and market context before making a final decision.
 
-                    CRITICAL RULES:
-                    - 'global_commodities_USD' values are in US Dollars ($).
-                    - 'indian_indices_INR' and stock prices are in Indian Rupees (₹) or Points.
-                    - Analyze the 'top_impact_headlines' carefully to understand the market drivers.
+                    For your analysis, carefully consider:
+                    1. News Sentiment & Situation: What is the exact reason for the market/stock movement (e.g., War, Rate Cut, Earnings)?
+                    2. Stock Strength: Is it a blue-chip major (like HDFC/TCS) that can survive a crash, or a weak small-cap?
+                    3. Probability of Recovery: If it's falling, is it a structural failure or a temporary panic?
+                    4. Timeframe: Balance the Short-term pain vs Long-term view.
 
-                    Based on the payload, provide a highly professional 3-point summary in JSON format EXACTLY with these keys:
-                    1. "macro_view": (Analyze the specific top headlines and commodity prices to explain current market conditions).
-                    2. "capital_strategy": (What to do with the {CAPITAL} INR capital right now based on the risk and macro view).
-                    3. "stock_focus": (Which 1 or 2 stocks from the payload have the best setup and why).
+                    Based on the payload, provide a highly professional JSON EXACTLY with these keys:
+                    1. "macro_situation": (Explain the exact situation and reason for market behavior based on headlines).
+                    2. "deep_reasoning": (Analyze the stock's strength, probability of recovery, and evaluate both short-term & long-term views).
+                    3. "final_verdict": (Your ultimate decision: BUY, ACCUMULATE, HOLD, or EXIT for the specific stocks. You may agree or disagree with the Python model's base action).
 
                     DATA PAYLOAD:
                     {json.dumps(payload, ensure_ascii=False)}
